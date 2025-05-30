@@ -1,19 +1,17 @@
 # Paystack4Python
 
-A Python SDK for integrating with the Paystack payment gateway. This library provides a simple and consistent interface for interacting with Paystack's API, making it easy to manage customers, transactions, plans, and more from your Python applications.
+A Python client library for the [Paystack API](https://paystack.com/docs/api/). This package provides convenient access to Paystack's payment services, allowing you to manage customers, transactions, plans, and more from your Python applications.
 
 ## Features
 
-- Customer management (create, fetch, update, list)
-- Transaction initialization, verification, and listing
-- Plan creation and management
-- Utilities for validating data
-- Custom error handling
-- Designed for easy integration with Django, Flask, or any Python project
+- Easy integration with Paystack's RESTful API
+- Manage customers, transactions, and plans
+- Error handling and utility functions
+- Pythonic interface for common Paystack operations
 
 ## Installation
 
-Install via pip (recommended):
+Install via pip:
 
 ```bash
 pip install paystack4python
@@ -22,91 +20,100 @@ pip install paystack4python
 Or clone this repository and install locally:
 
 ```bash
-git clone https://github.com/yourusername/paystack4python.git
+git clone https://github.com/mwaiseghegift/paystack4python.git
 cd paystack4python
 pip install .
 ```
 
-## Requirements
-
-- Python 3.6+
-- Requests (install via pip if not already present)
-
 ## Usage
 
-### Basic Setup
+First, import the relevant classes and initialize the API with your secret key:
 
 ```python
-from paystack4python.baseapi import PaystackAPI
+from paystack4python.baseapi import PaystackBaseAPI
+from paystack4python.customers import CustomersAPI
+from paystack4python.transactions import TransactionsAPI
+from paystack4python.plans import PlansAPI
 
-# Initialize with your secret key
-gateway = PaystackAPI(secret_key='sk_test_xxx')
+# Initialize the base API with your Paystack secret key
+api = PaystackBaseAPI(secret_key='sk_test_xxx')
+
+# Customers
+customers = CustomersAPI(api)
+response = customers.create(email='user@example.com', first_name='John', last_name='Doe')
+
+# Transactions
+transactions = TransactionsAPI(api)
+response = transactions.initialize(email='user@example.com', amount=5000)
+
+# Plans
+plans = PlansAPI(api)
+response = plans.create(name='Monthly Plan', amount=10000, interval='monthly')
 ```
 
-### Customers
+## API Reference
+
+### Authentication
+
+All API requests require your Paystack secret key. Pass it when initializing `PaystackBaseAPI`.
+
+### Modules
+
+- `baseapi.py`: Core API request logic and authentication
+- `customers.py`: Customer management (create, fetch, update, list)
+- `transactions.py`: Transaction initialization, verification, listing
+- `plans.py`: Plan creation, update, listing
+- `errors.py`: Custom exceptions for error handling
+- `utils.py`: Helper functions
+
+### Example: Creating a Customer
 
 ```python
-# Create a customer
-customer = gateway.customers.create(email='user@example.com', first_name='John', last_name='Doe')
+from paystack4python.baseapi import PaystackBaseAPI
+from paystack4python.customers import CustomersAPI
 
-# Fetch a customer
-customer = gateway.customers.fetch(customer_id='CUS_xxxxx')
-
-# List customers
-customers = gateway.customers.list()
+api = PaystackBaseAPI(secret_key='sk_test_xxx')
+customers = CustomersAPI(api)
+response = customers.create(email='user@example.com', first_name='Jane', last_name='Doe')
+print(response)
 ```
 
-### Transactions
+### Example: Initializing a Transaction
 
 ```python
-# Initialize a transaction
-transaction = gateway.transactions.initialize(email='user@example.com', amount=5000)
+from paystack4python.baseapi import PaystackBaseAPI
+from paystack4python.transactions import TransactionsAPI
 
-# Verify a transaction
-result = gateway.transactions.verify(reference='txn_ref')
-```
-
-### Plans
-
-```python
-# Create a plan
-plan = gateway.plans.create(name='Monthly Plan', amount=10000, interval='monthly')
-
-# List plans
-plans = gateway.plans.list()
-```
-
-### Utilities
-
-```python
-from paystack4python.utils import validate_amount, validate_interval
-
-validate_amount(1000)  # Returns 1000
-validate_interval('monthly')  # Returns 'monthly'
+api = PaystackBaseAPI(secret_key='sk_test_xxx')
+transactions = TransactionsAPI(api)
+response = transactions.initialize(email='user@example.com', amount=10000)
+print(response)
 ```
 
 ## Error Handling
 
-All errors are raised as subclasses of `paystack4python.errors.InvalidDataError` for easy exception handling.
+All API errors raise custom exceptions defined in `errors.py`. Use try/except blocks to handle errors gracefully.
 
 ```python
-from paystack4python.errors import InvalidDataError
+from paystack4python.errors import PaystackAPIError
 
 try:
-    validate_amount('abc')
-except InvalidDataError as e:
-    print(f"Validation failed: {e}")
+    # ... your code ...
+except PaystackAPIError as e:
+    print(f"Paystack error: {e}")
 ```
 
-## Running Tests
+## Testing
 
-Tests are located in the `tests/` directory. To run all tests:
+Run tests using pytest:
 
 ```bash
-python -m unittest discover tests
+pytest tests/
 ```
 
 ## Contributing
+
+Contributions are welcome! Please open issues or submit pull requests for bug fixes, features, or improvements.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/YourFeature`)
@@ -116,9 +123,4 @@ python -m unittest discover tests
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENCE) file for details.
-
-## Acknowledgements
-
-- [Paystack Documentation](https://paystack.com/docs/)
-- Inspired by the official Paystack Python SDKs and community libraries
+This project is licensed under the MIT License. See the `LICENCE` file for details.
