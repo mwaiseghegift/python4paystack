@@ -26,6 +26,8 @@ setup(name='paystack4python',
         'requests'
     ],
     packages=find_packages(),
-    zip_safe=False
+    zip_safe=False,
+    setup_requires=['setuptools_scm'],
+    use_scm_version=True,
 )
 
